@@ -3,30 +3,32 @@
 
 # 使用说明
 1. config.json中配置需要追的电视剧  type:暂时只支持 btjia,hao6v
-2. 修改config.json邮件发送信息   
+2. 修改config.json抓取电视信息
 3. 增加crontab定时任务
 
 # 持续开发
 sitelib资源网站库，新开发网站库步骤
 1. 实现GetHtml,ParseHtml方法
-2. 在go-teleplay.go 116行注册新资源
+2. 在go-teleplay.go 105行注册新资源
 
 # 路由器K3编译
+```
   linux/unix:
     env GOOS=linux GOARCH=arm go build go-teleplay.go
   windows:
     set GOOS=linux
     set GOARCH=arm
     go build go-teleplay.go
-
+```
 # 路由器K2p编译:
+```
   windows:
     set GOOS=linux
     set GOARCH=mipsle
     go build -ldflags "-w -s" go-teleplay.go
-
+```
 # 使用upx压缩
-  upx.exe -9 go-teleplay
+  `upx.exe -9 go-teleplay`
 
 # 部署
  上传执行文件和配置文件文档结构如图   
