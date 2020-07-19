@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"io"
 	"os"
-	"study01/sitelib"
+	"go-teleplay/sitelib"
 	"encoding/json"
 	"time"
 	"log"
@@ -124,9 +124,8 @@ func main() {
 		for k, v := range ret {
 			retCode, retMsg := sitelib.SendToServerChan(k, v, cv.ServerChanKey)
 			if retCode != 0 {
-				log.Println(retCode)
+				log.Println(k, v)
 				log.Println("Send mail error!%s", retMsg)
-				return
 			}else {
 				log.Println("Send mail success!")
 				film.Download = append(film.Download, k)
