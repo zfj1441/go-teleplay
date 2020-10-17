@@ -2,6 +2,7 @@ package sitelib
 
 //配置文件中电影数据结构
 type Teleplay struct {
+	Status   int
 	Name     string
 	Url      string
 	Type     string

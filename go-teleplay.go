@@ -2,20 +2,21 @@ package main
 
 import (
 	"bufio"
-	"io"
-	"os"
-	"go-teleplay/sitelib"
 	"encoding/json"
-	"time"
-	"log"
 	"flag"
 	"fmt"
+	"go-teleplay/sitelib"
+	"io"
+	"log"
+	"os"
+	"time"
 )
 
 //配置文件结构
 type Config struct {
 	ServerChanKey string
-	Teleplays []struct {
+	Teleplays     []struct {
+		Status   int
 		Name     string
 		Url      string
 		Type     string
@@ -46,7 +47,7 @@ func readJson(filePath string) (result string) {
 }
 
 //写入配置文件
-func writeJson(filePath string, jsonString string) (bool) {
+func writeJson(filePath string, jsonString string) bool {
 	file, err := os.Create(filePath)
 	if err != nil {
 		return false
@@ -60,19 +61,19 @@ func writeJson(filePath string, jsonString string) (bool) {
 }
 
 // 启动参数解析
-func param() (string, string){
+func param() (string, string) {
 	var configFile string
 	var logFile string
 
 	flag.StringVar(&configFile, "f", "config.json", "配置文件路径")
 	flag.StringVar(&logFile, "l", "go-teleplay.log", "日志文件路径")
 	flag.Parse()
-	return configFile,logFile
+	return configFile, logFile
 }
 
 var g_Configfile, g_Logfile string
 
-func init()  {
+func init() {
 	g_Configfile, g_Logfile = param()
 
 	fmt.Printf("启动参数 config_path=[%v] log_path=[%v]\n",
@@ -108,8 +109,13 @@ func main() {
 	var site sitelib.Siteinfunc
 	for i = 0; i < len(cv.Teleplays); i++ {
 		film := cv.Teleplays[i]
+		// 加入监控启用状态
+		if film.Status == 0 {
+			log.Printf("[%v]监控未启用", film.Name)
+			continue
+		}
 		site = plugin.Sitelist[film.Type]
-		html, err := site.GetHtml(film.Url)    //下载数据
+		html, err := site.GetHtml(film.Url) //下载数据
 		if err != nil {
 			log.Println("下载数据失败")
 			continue
@@ -125,8 +131,8 @@ func main() {
 			retCode, retMsg := sitelib.SendToServerChan(k, v, cv.ServerChanKey)
 			if retCode != 0 {
 				log.Println(k, v)
-				log.Println("Send mail error!%s", retMsg)
-			}else {
+				log.Printf("Send mail error!%v", retMsg)
+			} else {
 				log.Println("Send mail success!")
 				film.Download = append(film.Download, k)
 			}
