@@ -40,5 +40,11 @@ sitelib资源网站库，新开发网站库步骤
   0,30 9-23 * * *  /root/go-teleplay >>/tmp/go-teleplay.log 2>&1 #9点到23点 每30分钟执行一次
     
 
-# 后续
-1.配合玩客云，有更新时直接推下载
+# 更新
+* 2020年11月12日.更新玩客云直接推下载
+
+
+# 感谢
+* 玩客云python接口 https://github.com/allanpk716/WanKeYunApi
+* https://github.com/Adyzng/go-jd对cookie的封装
+* https://github.com/jsfaint/sentinel
