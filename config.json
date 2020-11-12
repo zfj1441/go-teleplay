@@ -1,10 +1,12 @@
 {
- "ServerChanKey": "key",
+ "ServerChanKey": "xxx",
+ "Phone": "xxx",
+ "Pass": "xxx",
  "Teleplays": [
   {
-   "Status": 0,
+   "Status": 1,
    "Name": "民国奇探",
-   "Url": "http://www.2btjia.com/thread-index-fid-10-tid-34909.htm",
+   "Url": "http://www.7btjia.com/thread-index-fid-10-tid-34909.htm",
    "Type": "btjia",
    "Download": [
     "国民奇探.EP09-10.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
@@ -16,12 +18,11 @@
     "国民奇探.EP23-24.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
     "国民奇探.EP21-22.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
     "国民奇探.EP27-36.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
-    "国民奇探.EP25-26.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
-    "国民奇探.EP01-08.2020.1080p.国语中字.WEBrip.H265.mp4.torrent"
+    "国民奇探.EP25-26.2020.1080p.国语中字.WEBrip.H265.mp4.torrent"
    ]
   },
   {
-   "Status": 1,
+   "Status": 0,
    "Name": "龙岭迷窟",
    "Url": "http://www.hao6v.net/dlz/2020-04-01/35043.html",
    "Type": "hao6v",

@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"go-teleplay/sitelib"
+	"go-teleplay/wkycore"
 	"io"
 	"log"
 	"os"
@@ -15,6 +16,8 @@ import (
 //配置文件结构
 type Config struct {
 	ServerChanKey string
+	Phone         string
+	Pass          string
 	Teleplays     []struct {
 		Status   int
 		Name     string
@@ -93,7 +96,15 @@ func main() {
 	result := readJson(g_Configfile)
 	err := json.Unmarshal([]byte(result), &cv)
 	if err != nil {
-		log.Println("ERROR:", err)
+		log.Println("ERROR: %+v", err.Error())
+		return
+	}
+
+	//玩客云客户端初始化
+	wkyClit := wkycore.NewWkyCore(cv.Phone, cv.Pass)
+	defer wkyClit.Release()
+	if !wkyClit.LoginEx() {
+		log.Fatal("玩客云客户端登录失败")
 		return
 	}
 
@@ -128,12 +139,19 @@ func main() {
 
 		// 发送邮件
 		for k, v := range ret {
-			retCode, retMsg := sitelib.SendToServerChan(k, v, cv.ServerChanKey)
-			if retCode != 0 {
-				log.Println(k, v)
-				log.Printf("Send mail error!%v", retMsg)
+			log.Printf("k[%v][%v]\n", k, v)
+			if err := wkyClit.CreateTasks(v); err != nil {
+				log.Printf("请求下载失败:%+v", err.Error())
+				retCode, retMsg := sitelib.SendToServerChan(k, v, cv.ServerChanKey)
+				if retCode != 0 {
+					log.Println(k, v)
+					log.Printf("Send mail error!%v", retMsg)
+				} else {
+					log.Println("Send mail success!")
+					film.Download = append(film.Download, k)
+				}
 			} else {
-				log.Println("Send mail success!")
+				log.Print("请求下载成功")
 				film.Download = append(film.Download, k)
 			}
 		}
