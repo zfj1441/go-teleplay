@@ -45,6 +45,6 @@ sitelib资源网站库，新开发网站库步骤
 
 
 # 感谢
-* 玩客云python接口 https://github.com/allanpk716/WanKeYunApi
-* https://github.com/Adyzng/go-jd对cookie的封装
-* https://github.com/jsfaint/sentinel
+* 玩客云python接口[https://github.com/allanpk716/WanKeYunApi](https://github.com/allanpk716/WanKeYunApi)
+* [https://github.com/Adyzng/go-jd](https://github.com/Adyzng/go-jd)对cookie的封装
+* [https://github.com/jsfaint/sentinel](https://github.com/jsfaint/sentinel)

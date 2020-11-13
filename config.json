@@ -1,7 +1,11 @@
 {
  "ServerChanKey": "xxx",
- "Phone": "xxx",
- "Pass": "xxx",
+  "WkyConfig": {
+    "Phone": "186xxxxxxx",
+    "Pass": "1234567890",
+    "CookieFile": "wky.cookies",
+    "UserinfoFile": "wky.userinfo"
+  },
  "Teleplays": [
   {
    "Status": 1,
@@ -18,7 +22,8 @@
     "国民奇探.EP23-24.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
     "国民奇探.EP21-22.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
     "国民奇探.EP27-36.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
-    "国民奇探.EP25-26.2020.1080p.国语中字.WEBrip.H265.mp4.torrent"
+     "国民奇探.EP25-26.2020.1080p.国语中字.WEBrip.H265.mp4.torrent",
+     "国民奇探.EP01-08.2020.1080p.国语中字.WEBrip.H265.mp4.torrent"
    ]
   },
   {

@@ -26,8 +26,6 @@ const (
 )
 
 var (
-	// URLForQR is the login related URL
-
 	DefaultHeaders = map[string]string{
 		"User-Agent":      "Chrome/51.0.2704.103",
 		"ContentType":     "application/json", //"text/html; charset=utf-8",
@@ -35,19 +33,14 @@ var (
 		"Accept-Encoding": "gzip, deflate",
 		"Accept-Language": "zh-CN,zh;q=0.8",
 	}
-
-	maxNameLen   = 40
-	cookieFile   = "wky.cookies"
-	userinfoFile = "wky.userinfo"
 )
 
-type respLogin struct {
-	respHead
-	Data UserInfo `json:"data"`
-}
-type respHead struct {
-	Ret int    `json:"iRet"`
-	Msg string `json:"sMsg"`
+// 玩客云配置文件
+type WkyConfig struct {
+	Phone        string
+	Pass         string
+	CookieFile   string
+	UserinfoFile string
 }
 
 //UserInfo defines user information
@@ -64,25 +57,23 @@ type UserInfo struct {
 
 // WkyCore wrap jing dong operation
 type WkyCore struct {
-	client   *http.Client
-	jar      *SimpleJar
-	Phone    string
-	Pass     string
-	Userinfo *UserInfo
-	Peers    *Peers
+	WkyConfig WkyConfig
+	client    *http.Client
+	jar       *SimpleJar
+	Userinfo  *UserInfo
+	Peers     *Peers
 }
 
 // NewWkyCore create an object to wrap WkyCore related operation
 //
-func NewWkyCore(Phone, Pass string) *WkyCore {
+func NewWkyCore(cf WkyConfig) *WkyCore {
 	wky := &WkyCore{
-		Phone: Phone,
-		Pass:  Pass,
+		WkyConfig: cf,
 	}
 
 	wky.jar = NewSimpleJar(JarOption{
 		JarType:  JarJson,
-		Filename: cookieFile,
+		Filename: wky.WkyConfig.CookieFile,
 	})
 
 	// 装载cookies
@@ -92,7 +83,7 @@ func NewWkyCore(Phone, Pass string) *WkyCore {
 	}
 	// 状态用户信息
 	var uinfo UserInfo
-	fd, err := os.Open(userinfoFile)
+	fd, err := os.Open(wky.WkyConfig.UserinfoFile)
 	if err == nil {
 		err = json.NewDecoder(fd).Decode(&uinfo)
 	} else if os.IsNotExist(err) {
@@ -117,7 +108,7 @@ func (wky *WkyCore) Release() {
 	}
 
 	if wky.Userinfo != nil {
-		fd, err := os.Create(userinfoFile)
+		fd, err := os.Create(wky.WkyConfig.UserinfoFile)
 		if err == nil {
 			err = json.NewEncoder(fd).Encode(wky.Userinfo)
 		}
@@ -149,24 +140,31 @@ func (wky *WkyCore) validateLogin() bool {
 
 // 使用用户密码登录
 func (wky *WkyCore) Login(URL string) error {
+
+	type respLogin struct {
+		Rtn  int      `json:"rtn"`
+		Msg  string   `json:"msg"`
+		Data UserInfo `json:"data"`
+	}
+
 	var (
 		err  error
 		resp *http.Response
 	)
 
 	sign := GetSign(false, map[string]string{
-		"deviceid":     GetDevID(wky.Phone),
-		"imeiid":       GetIMEI(wky.Phone),
-		"phone":        wky.Phone,
-		"pwd":          GetPWD(wky.Pass),
+		"deviceid":     GetDevID(wky.WkyConfig.Phone),
+		"imeiid":       GetIMEI(wky.WkyConfig.Phone),
+		"phone":        wky.WkyConfig.Phone,
+		"pwd":          GetPWD(wky.WkyConfig.Pass),
 		"account_type": AccountType,
 	}, "")
 
 	body := map[string]string{
-		"deviceid":     GetDevID(wky.Phone),
-		"imeiid":       GetIMEI(wky.Phone),
-		"phone":        wky.Phone,
-		"pwd":          GetPWD(wky.Pass),
+		"deviceid":     GetDevID(wky.WkyConfig.Phone),
+		"imeiid":       GetIMEI(wky.WkyConfig.Phone),
+		"phone":        wky.WkyConfig.Phone,
+		"pwd":          GetPWD(wky.WkyConfig.Pass),
 		"account_type": "4",
 		"sign":         sign,
 	}
@@ -181,30 +179,30 @@ func (wky *WkyCore) Login(URL string) error {
 		log.Printf("请求（%+v）失败: %+v", URL, err)
 		return err
 	}
-	// TODO 判断接口返回码
 	if resp.StatusCode == http.StatusOK {
-		log.Printf("登陆成功")
+		log.Printf("请求成功")
 	} else {
 		log.Printf("登陆失败:%+v", resp.Status)
-		err = fmt.Errorf("%+v", resp.Status)
-		return err
+		return fmt.Errorf("登陆失败:%+v", resp.Status)
 	}
 	contentBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("读取响应错误 %+v", err.Error())
 		return err
 	}
-	var respData respLogin
-	if err := json.Unmarshal([]byte(contentBytes), &respData); err != nil {
+	var v respLogin
+	if err := json.Unmarshal([]byte(contentBytes), &v); err != nil {
 		log.Printf("响应解析错误 %+v", err.Error())
 		return err
 	}
-	wky.Userinfo = &respData.Data
+	if v.Rtn != 0 {
+		return fmt.Errorf("Invalid response result[%+v][%+v]", v.Rtn, v.Msg)
+	}
+
+	wky.Userinfo = &v.Data
 	return nil
 }
 
-// Login used to login wky by QR code.
-// if the cookies file exits, will try cookies first.
 func (wky *WkyCore) LoginEx(args ...interface{}) bool {
 	if wky.validateLogin() {
 		log.Print("无需重新登录")
@@ -217,8 +215,12 @@ func (wky *WkyCore) LoginEx(args ...interface{}) bool {
 			log.Printf(err.Error())
 			return false
 		} else {
-			wky.validateLogin()
-			return true
+			if wky.validateLogin() {
+				return true
+			} else {
+				log.Print("玩客云登录失败")
+				return false
+			}
 		}
 	}
 }

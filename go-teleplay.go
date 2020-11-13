@@ -16,8 +16,7 @@ import (
 //配置文件结构
 type Config struct {
 	ServerChanKey string
-	Phone         string
-	Pass          string
+	WkyConfig     wkycore.WkyConfig
 	Teleplays     []struct {
 		Status   int
 		Name     string
@@ -101,7 +100,7 @@ func main() {
 	}
 
 	//玩客云客户端初始化
-	wkyClit := wkycore.NewWkyCore(cv.Phone, cv.Pass)
+	wkyClit := wkycore.NewWkyCore(cv.WkyConfig)
 	defer wkyClit.Release()
 	if !wkyClit.LoginEx() {
 		log.Fatal("玩客云客户端登录失败")
