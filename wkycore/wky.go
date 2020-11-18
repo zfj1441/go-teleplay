@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ import (
 
 const (
 	//URL
-	URL_Login       = "http://account.onethingpcs.com/user/login?appversion=2.6.0"
+	URL_Login       = "http://account.onethingpcs.com/user/login"
 	URL_ListPeer    = "http://control.onethingpcs.com/listPeer"
 	URL_UsbInfo     = "http://control.onethingpcs.com/getUSBInfo"
 	URL_RemoteLogin = "http://control-remotedl.onethingpcs.com/login"
@@ -139,7 +140,7 @@ func (wky *WkyCore) validateLogin() bool {
 }
 
 // 使用用户密码登录
-func (wky *WkyCore) Login(URL string) error {
+func (wky *WkyCore) Login() error {
 
 	type respLogin struct {
 		Rtn  int      `json:"rtn"`
@@ -169,14 +170,25 @@ func (wky *WkyCore) Login(URL string) error {
 		"sign":         sign,
 	}
 
+	query := map[string]string{
+		"appversion": WkAppVersion,
+	}
+
+	u, _ := url.Parse(URL_Login)
+	q := u.Query()
+	for k, v := range query {
+		q.Set(k, v)
+	}
+	u.RawQuery = q.Encode()
+
 	var values []string
 	for k, v := range body {
 		values = append(values, fmt.Sprintf("%s=%s", k, v))
 	}
 
-	resp, err = wky.client.Post(URL, "", strings.NewReader(strings.Join(values, "&")))
+	resp, err = wky.client.Post(u.String(), "", strings.NewReader(strings.Join(values, "&")))
 	if err != nil {
-		log.Printf("请求（%+v）失败: %+v", URL, err)
+		log.Printf("请求（%+v）失败: %+v", u.String(), err)
 		return err
 	}
 	if resp.StatusCode == http.StatusOK {
@@ -211,7 +223,7 @@ func (wky *WkyCore) LoginEx(args ...interface{}) bool {
 		log.Print("新登录中")
 		wky.jar.Clean()
 
-		if err := wky.Login(URL_Login); err != nil {
+		if err := wky.Login(); err != nil {
 			log.Printf(err.Error())
 			return false
 		} else {

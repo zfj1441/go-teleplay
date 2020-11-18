@@ -185,7 +185,7 @@ func (wky *WkyCore) GetPeerList() error {
 		return err
 	}
 	content, _ := ioutil.ReadAll(resp.Body)
-	log.Println(string(content))
+	log.Printf("GetPeerList:%+v", string(content))
 	var v respListPeer
 	if err := json.Unmarshal(content, &v); err != nil {
 		return err
